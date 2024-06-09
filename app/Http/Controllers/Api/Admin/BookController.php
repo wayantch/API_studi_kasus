@@ -35,22 +35,61 @@ class BookController extends Controller
     }
 
     public function store(StoreBookRequest $request)
-    {
-        $response = $this->default_response;
+{
+    $response = $this->default_response;
 
-        try {
-            $data = $request->validated();
+    try {
+        $data = $request->validated();
+        $path = null;
 
-            if ($request->hasFile('image')) {
-                $file = $request->file('image');
-                $path = $file->storeAs('books', $file->hashName(), 'public');
-            }
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $path = $file->storeAs('booksImg', $file->hashName(), 'public');
+        }
 
-            $book = new Book();
+        $book = new Book();
+        $book->title = $data['title'];
+        $book->author = $data['author'];
+        $book->publication_add = $data['publication_add'];
+        $book->image = $path; // Simpan path gambar ke dalam basis data
+        $book->category_id = $data['category_id'];
+        $book->save();
+
+        $response['success'] = true;
+        $response['data'] = [
+            'book' => $book->with('category')->find($book->id),
+        ];
+    } catch (Exception $e) {
+        $response['success'] = false;
+        $response['message'] = $e->getMessage();
+    }
+
+    return response()->json($response);
+}
+
+public function update(UpdateBookRequest $request, String $id)
+{
+    $response = $this->default_response;
+
+    try {
+        $data = $request->validated();
+        $path = null;
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $path = $file->storeAs('books', $file->hashName(), 'public');
+        }
+
+        $book = Book::find($id);
+
+        if ($book) {
             $book->title = $data['title'];
             $book->author = $data['author'];
             $book->publication_add = $data['publication_add'];
-            $book->image = $path ?? null;
+
+            if ($request->hasFile('image')) {
+                $book->image = $path; // Simpan path gambar ke dalam basis data
+            }
             $book->category_id = $data['category_id'];
             $book->save();
 
@@ -58,54 +97,18 @@ class BookController extends Controller
             $response['data'] = [
                 'book' => $book->with('category')->find($book->id),
             ];
-        } catch (Exception $e) {
+            $response['message'] = 'Product updated successfully';
+        } else {
             $response['success'] = false;
-            $response['message'] = $e->getMessage();
+            $response['message'] = 'Product not found';
         }
-
-        return response()->json($response);
+    } catch (Exception $e) {
+        $response['success'] = false;
+        $response['message'] = $e->getMessage();
     }
-    public function update(UpdateBookRequest $request, String $id)
-    {
-        $response = $this->default_response;
 
-        try {
-            $data = $request->validated();
-
-            if ($request->hasFile('image')) {
-                $file = $request->file('image');
-                $path = $file->storeAs('books', $file->hashName(), 'public');
-            }
-
-            $book = Book::find($id);
-
-            if ($book) {
-                $book->title = $data['title'];
-                $book->author = $data['author'];
-                $book->publication_add = $data['publication_add'];
-
-                if ($request->hasFile('image')) {
-                    $book->image = $path ?? null;
-                }
-                $book->category_id = $data['category_id'];
-                $book->save();
-
-                $response['success'] = true;
-                $response['data'] = [
-                    'book' => $book->with('category')->find($book->id),
-                ];
-                $response['message'] = 'Product updated successfully';
-            } else {
-                $response['success'] = false;
-                $response['message'] = 'Product not found';
-            }
-        } catch (Exception $e) {
-            $response['success'] = false;
-            $response['message'] = $e->getMessage();
-        }
-
-        return response()->json($response);
-    }
+    return response()->json($response);
+}
 
     public function destroy(String $id)
     {

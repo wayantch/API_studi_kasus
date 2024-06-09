@@ -40,7 +40,7 @@ class AuthController extends Controller
             $response['data'] = $user;
             $response['message'] = 'Registered successfully';
 
-            return response()->redirectTo('/api/login');
+            return response()->json($response);
 
         } catch (Exception $e) {
             DB::rollBack();

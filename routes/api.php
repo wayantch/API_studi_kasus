@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Admin\BookController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\User\BookUserController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CustomerMiddleware;
 use Illuminate\Http\Request;
@@ -33,3 +34,4 @@ Route::group(['middleware' => ['auth:sanctum', 'isAdmin'], 'prefix' => 'admin'],
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/books', [BookUserController::class, 'index']);
