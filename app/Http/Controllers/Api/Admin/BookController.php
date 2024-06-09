@@ -44,7 +44,7 @@ class BookController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $path = $file->storeAs('booksImg', $file->hashName(), 'public');
+            $path = $file->storeAs('books', $file->hashName(), 'public');
         }
 
         $book = new Book();
